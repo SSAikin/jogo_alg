@@ -43,7 +43,10 @@ class Level(object):
 		#screen.fill([255, 255, 255])
 		#screen.blit(BackGround.image, BackGround.rect)
 		self.platform_list.draw(screen)
- 
+	def draw_black(self, screen, myfont, text):
+		screen.fill(GREEN)
+		textsurface = myfont.render(text, False, (255,255,255)) 
+		screen.blit(textsurface, (100, 100))
 
 
 
@@ -72,12 +75,22 @@ class Level_01(Level):
 
 
 
- 
+def set_players(player1, player2, level_atual):
+	player1.rect.x = 350
+	player2.rect.x = 850
+	set_player(player1, level_atual)
+	set_player(player2, level_atual)
+
+def set_player(player, level_atual):
+	player.level = level_atual
+	player.rect.y = SCREEN_HEIGHT - (player.rect.height) * 2
+
 def main():
 
 	pygame.init()
+	myfont = pygame.font.SysFont("monospace", 140)
 	screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
-	pygame.display.set_caption("TowerFall Ascencions da Deep Web")
+	pygame.display.set_caption("SeMatano")
 
 
  	#nasce player
@@ -93,13 +106,8 @@ def main():
 	level_atual = level_list[level_num]
  
 	sprite_jogo = pygame.sprite.Group()
-	player1.level = level_atual
-	player2.level = level_atual
-
-	player1.rect.x = 350
-	player1.rect.y = SCREEN_HEIGHT - (player1.rect.height) * 2
-	player2.rect.x = 850
-	player2.rect.y = SCREEN_HEIGHT - (player2.rect.height) * 2
+	set_players(player1, player2, level_atual)
+	
 	sprite_jogo.add(player1)
 	sprite_jogo.add(player2)
  
@@ -139,31 +147,60 @@ def main():
 					player2.stop()
 
 		#colisão entre eles
-		collision = pygame.sprite.collide_rect(player1, player2)
-
-		
-		#Eu não confio nesse sistema que eu achei
-		if collision == True: #margem de erro and player1.rect.x>=(player2.rect.x-30) and player1.rect.x<=(player2.rect.x+30) and player1.rect.y>=player2.rect.y-38:
-			sprite_jogo.remove(player2,player1)
-			SCORE1+=1
-			player1.jump()
-			sprite_jogo.update()
+		if player2 in sprite_jogo and player1 in sprite_jogo:
+			if (player2.rect.bottom > player1.rect.bottom >= player2.rect.top) and ((player2.rect.right > player1.rect.right > player2.rect.left) or (player2.rect.left < player1.rect.left < player2.rect.right)):
+				sprite_jogo.remove(player2)
+				player1.pontuacao += 1
+				player1.jump()
+				sprite_jogo.update()
+			if (player1.rect.bottom > player2.rect.bottom >= player1.rect.top) and ((player1.rect.right > player2.rect.right > player1.rect.left) or (player1.rect.left < player2.rect.left < player1.rect.right)):
+				sprite_jogo.remove(player1)
+				player2.pontuacao += 1
+				player2.jump()
+				sprite_jogo.update()
+		print("player1: " + str(player1.pontuacao))
+		print("player2: " + str(player2.pontuacao))
 			#pressione espaço
-		if event.type == pygame.KEYDOWN and pygame.KEYDOWN == pygame.K_SPACE:
+		if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+			sprite_jogo.remove(player2)
 			sprite_jogo.remove(player1)
-			sprite_jogo.add(player1, player2)
+			sprite_jogo.update()
+			player1= Player("branco.png")
+			player2= Player("preto.png")
+			set_players(player1, player2, level_atual)
+			sprite_jogo.add(player1)
+			sprite_jogo.add(player2)
+			sprite_jogo.update()
 
-		if SCORE2>=3 or SCORE1>=3:
-			sprite_jogo.add(player1, player2)
+		if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+			sprite_jogo.remove(player2)
+			sprite_jogo.update()
+			player2= Player("preto.png")
+			player2.rect.x = 850
+			set_player(player2, level_atual)
+			sprite_jogo.add(player2)
+			sprite_jogo.update()
+		
+		if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+			sprite_jogo.remove(player1)
+			sprite_jogo.update()
+			player1= Player("branco.png")
+			player1.rect.x = 350
+			set_player(player1, level_atual)
+			sprite_jogo.add(player1)
+			sprite_jogo.update()
 
-		#if SCORE2 or SCORE1 >=3: #???
-		#	level_num = 1
-		#	SCORE2=0
-		#	SCORE1=0
-
-		#if SCORE2 or SCORE1 >=3 and level_num==1:
-		#	done = True
-
+		if player1.pontuacao>=3 or player2.pontuacao>=3:
+			if player1.pontuacao>=3:
+				level_atual.draw_black(screen, myfont, "branco ganhou")
+			elif player2.pontuacao>=3:
+				level_atual.draw_black(screen, myfont, "preto ganhou")
+			sprite_jogo.remove(player2)
+			sprite_jogo.remove(player1)
+			sprite_jogo.update()
+		else:
+			level_atual.draw(screen)
+			sprite_jogo.draw(screen)
 
 
 		#Tem que dar update pra mexer, maldito
@@ -192,8 +229,7 @@ def main():
 			player2.rect.top = SCREEN_HEIGHT - player2.rect.height
 
 
-		level_atual.draw(screen)
-		sprite_jogo.draw(screen)
+		
 
 		clock.tick(60)	
  
