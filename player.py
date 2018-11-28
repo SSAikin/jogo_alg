@@ -1,7 +1,7 @@
 import pygame
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self,cor):
+	def __init__(self,cor,pontuacao):
 		super().__init__()
 
 		width = 35
@@ -9,13 +9,12 @@ class Player(pygame.sprite.Sprite):
 		self.image = pygame.image.load(cor)
 		self.rect = self.image.get_rect()
 		self.double = 0
-		self.pontuacao = 0
+		self.pontuacao = pontuacao
 		self.name = cor.split(".")[0]
- 
- 		#Ele pede
 		self.change_x = 0
 		self.change_y = 0
  
+
 	def update(self): ###ESSSSSSSSEEEEEEEEEEEEEEEEEEE AQUI
 			
 		self.calc_grav()
@@ -23,8 +22,7 @@ class Player(pygame.sprite.Sprite):
 		# dir/esq
 		self.rect.x += self.change_x
  
-		# Colisão lateral
-		# spritecollide(sprite, group, dokill, collided = None)
+		# Colisão na parede
 		block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list,False)
 		for block in block_hit_list:
 			if self.change_x > 0:
@@ -35,7 +33,7 @@ class Player(pygame.sprite.Sprite):
 		# Cima/baixo
 		self.rect.y += self.change_y
  
-		# Check
+		# Colisão na parede, mas agora com a cabeça (Carinha aquela)
 		block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
 		for block in block_hit_list:
 			if self.change_y > 0:
@@ -45,12 +43,7 @@ class Player(pygame.sprite.Sprite):
 			#Pra quando bate a cabeça
 			self.change_y = 0
 
-		#all_sprites_list = pygame.sprite.Group()
 
-		#if pygame.sprite.spritecollideany(player1,player2) != None:
-		#	print('collision')
-		#	return True
-		#return False
 
 	def calc_grav(self):
 		if self.change_y == 0: #se não sobe é 1
@@ -86,13 +79,21 @@ class Player(pygame.sprite.Sprite):
 			self.image = pygame.transform.flip(self.image,True,False)
 			self.dire=0
 
-	def stop(self):
-		self.change_x = 0
-
 	def dash_l(self):
 		self.change_x = -12
+		dire=1
+		if self.dire==0:
+			self.image = pygame.transform.flip(self.image,True,False)
+			self.dire=1
 
 	def dash_r(self):
 		self.change_x = 12
+		dire=0
+		if self.dire==1:
+			self.image = pygame.transform.flip(self.image,True,False)
+			self.dire=0
+
+	def stop(self):
+		self.change_x = 0
 
 	#def shoot(self):
