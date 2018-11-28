@@ -9,6 +9,8 @@ class Player(pygame.sprite.Sprite):
 		self.image = pygame.image.load(cor)
 		self.rect = self.image.get_rect()
 		self.double = 0
+		self.pontuacao = 0
+		self.name = cor.split(".")[0]
  
  		#Ele pede
 		self.change_x = 0
